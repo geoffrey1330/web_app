@@ -32,7 +32,7 @@ stages {
     stage('Deploy') { 
         steps { 
             sshagent(credentials: ['creds_srv']) { 
-                sh 'ssh -o StrictHostKeyChecking=no 109.74.204.122 "cd web_app && git pull && go build ./web_app.go && ./web_app &"' 
+                sh 'ssh -o StrictHostKeyChecking=no root@109.74.204.122 "cd web_app && git pull && go build ./web_app.go && ./web_app &"' 
             } 
         } 
         }
