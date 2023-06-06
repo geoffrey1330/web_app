@@ -1,6 +1,5 @@
 pipeline {
 agent any
-tools { go '1.19' }
 stages {
     stage('Checkout SCM') { 
       steps { 
@@ -24,18 +23,18 @@ stages {
         steps {
                 echo 'Testing application...'
                 sh './web_app &'
-                sh '''response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80) &&
+                sh '''response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080) &&
                 echo Resoince is: $response &&
                 [ "$response" = "200" ] && exit 0 || exit 1'''
             }
         }
-    stage('Deploy') { 
-        steps { 
-            sshagent(credentials: ['creds_srv']) { 
-                sh 'ssh -o StrictHostKeyChecking=no root@109.74.204.122 "cd web_app && git pull && go build ./web_app.go && ./web_app &"' 
-            } 
-        } 
-        }
+    //stage('Deploy') { 
+    //    steps { 
+    //        sshagent(credentials: ['creds_srv']) { 
+    //            sh 'ssh -o StrictHostKeyChecking=no root@109.74.204.122 "cd web_app && git pull && go build ./web_app.go && ./web_app &"' 
+    //        } 
+    //    } 
+    //    }
     }
 }
 
