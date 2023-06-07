@@ -1,34 +1,40 @@
 pipeline {
-  agent {
-   docker {  
-     image 'golang:latest'
-     args '-e GOCACHE=/home/ubuntu/jenkins_node/workspace/pipeline_lesson_9'
-  }
-}
-stages {
-  stage('Build') {
-    steps {
-        echo 'Building application...'
-        sh 'echo $GOCACHE'
-        sh 'go build ./web_app.go'
+  agent none
+  stages {
+    stage('Build and Test') {
+      agent {
+        docker {
+          image 'golang:latest'
+          args '-e GOCACHE=/home/ubuntu/jenkins_node/workspace/pipeline_lesson_9'
         }
-    }
-  stage('Test') {
-    steps {
+      }
+      steps {
+        stage('Build') {
+          steps {
+            echo 'Building application...'
+            sh 'echo $GOCACHE'
+            sh 'go build ./web_app.go'
+          }
+        }
+        stage('Test') {
+          steps {
             echo 'Testing application...'
             sh './web_app &'
-            sh '''response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080) &&
-            echo Resoince is: $response &&
+            sh '''response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081) &&
+            echo Response is: $response &&
             [ "$response" = "200" ] && exit 0 || exit 1'''
+          }
         }
+      }
     }
-    //stage('Deploy') { 
-    //    steps { 
-    //        sshagent(credentials: ['creds_srv']) { 
-    //            sh 'ssh -o StrictHostKeyChecking=no root@109.74.204.122 "cd web_app && git pull && go build ./web_app.go && ./web_app &"' 
-    //        } 
-    //    } 
-    //    }
+    stage('Deploy') {
+      agent { label 'node1' }
+      steps {
+        echo 'Deploying application...'
+        sshagent(credentials: ['ubuntu-creds']) {
+          sh 'ssh -o StrictHostKeyChecking=no ubuntu@54.198.99.116 "cd /home/ubuntu/web_app && sudo git pull && sudo go build ./web_app.go && sudo systemctl restart web_app"'
+        }
+      }
     }
+  }
 }
-
