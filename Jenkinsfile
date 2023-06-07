@@ -8,7 +8,7 @@ pipeline {
           args '-e GOCACHE=/home/ubuntu/jenkins_node/workspace/pipeline_lesson_9'
         }
       }
-      steps {
+      stages {
         stage('Build') {
           steps {
             echo 'Building application...'
@@ -21,7 +21,7 @@ pipeline {
             echo 'Testing application...'
             sh './web_app &'
             sh '''response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081) &&
-            echo Response is: $response &&
+            echo Resoince is: $response &&
             [ "$response" = "200" ] && exit 0 || exit 1'''
           }
         }
@@ -32,7 +32,7 @@ pipeline {
       steps {
         echo 'Deploying application...'
         sshagent(credentials: ['ubuntu-creds']) {
-          sh 'ssh -o StrictHostKeyChecking=no ubuntu@54.198.99.116 "cd /home/ubuntu/web_app && sudo git pull && sudo go build ./web_app.go && sudo systemctl restart web_app"'
+            sh 'ssh -o StrictHostKeyChecking=no ubuntu@54.198.99.116 "cd /home/ubuntu/web_app && sudo git pull && sudo go build ./web_app.go && sudo systemctl restart web_app"'
         }
       }
     }
